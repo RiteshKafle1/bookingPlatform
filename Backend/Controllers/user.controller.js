@@ -4,6 +4,7 @@ import prisma from "../DB/db";
 import generateVerificationToken from "../Utils/verification.token";
 import sendMail from "../Utils/send.verification.mail";
 import generateJsonToken from "../Utils/json.token";
+import jwt from 'jsonwebtoken';
 
 export const registerUser = async (req, res) => {
   try {
@@ -91,11 +92,33 @@ export const loginUser = async (req, res) => {
   }
 };
 
-export const logoutUser=async(req,res)=>{
+export const logoutUser = async (req, res) => {
   try {
-    
+    res.clearCookie("token");
+    return res.status(200).json({
+      error: false,
+      message: "Logged Out Success.",
+    });
   } catch (error) {
-    console.log('Error in lo');
-    
+    console.log("Error in login function", error);
   }
-}
+};
+
+export const loginAdmin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (
+      email === process.env.ADMIN_EMAIL &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
+      const jwtToken = jwt.sign({ data:email+password }, process.env.SECRET_KEY, {
+        expiresIn: "3d",
+      });
+
+      return res.json({error:false,token:jwtToken});
+    }
+  } catch (error) {
+    console.log("Error in login Admin Function", error);
+  }
+};
