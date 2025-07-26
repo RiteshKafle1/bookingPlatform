@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import prisma from "../DB/db";
 import generateVerificationToken from "../Utils/verification.token";
 import sendMail from "../Utils/send.verification.mail";
+import generateJsonToken from "../Utils/json.token";
 
 export const registerUser = async (req, res) => {
   try {
@@ -58,3 +59,43 @@ export const registerUser = async (req, res) => {
     console.log("error in register user funtion", error);
   }
 };
+export const loginUser = async (req, res) => {
+  try {
+    const { userEmail, password, role } = req.body;
+
+    if (!userEmail || !password)
+      return res.json({ error: true, message: "No empty fields allowed" });
+
+    const userExists = await prisma.user.findUnique({
+      where: {
+        userEmail,
+        role,
+      },
+    });
+
+    if (!userExists) return res.json({ error: true, message: "No user found" });
+
+    const isPassValid = await bcrypt.compare(password, userExists.password);
+    if (!isPassValid)
+      return res.json({ error: true, message: "Invalid credentials" });
+
+    generateJsonToken(res, userExists.user_id);
+
+    return res.json({
+      error: false,
+      message: "login Success",
+      data: userExists,
+    });
+  } catch (error) {
+    console.log("Error in login user function", error);
+  }
+};
+
+export const logoutUser=async(req,res)=>{
+  try {
+    
+  } catch (error) {
+    console.log('Error in lo');
+    
+  }
+}
