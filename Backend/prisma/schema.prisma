@@ -25,8 +25,8 @@ model User{
   password String?
   phone String?
   role UserRole
-  verification_token String
-  verification_token_expires_at DateTime
+  verification_token String?
+  verification_token_expires_at DateTime?
   created_at DateTime @default(now())
 
 }
