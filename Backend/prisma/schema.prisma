@@ -13,56 +13,75 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-enum UserRole{
+
+enum UserRole {
   user
   vendor
   admin
 }
-model User{
-  user_id String @id @default(uuid()) @db.Uuid
-  userName String 
-  userEmail String @unique
-  password String?
-  phone String?
-  role UserRole
-  verification_token String?
-  verification_token_expires_at DateTime?
-  created_at DateTime @default(now())
-  vendors    Vendor[]
 
+model User {
+  user_id                       String    @id @default(uuid()) @db.Uuid
+  userName                      String
+  userEmail                     String    @unique
+  password                      String?
+  phone                         String?
+  role                          UserRole
+  verification_token            String?
+  verification_token_expires_at DateTime?
+  created_at                    DateTime  @default(now())
+  vendors                       Vendor[]
 }
 
-model Vendor{
-  vendor_id String @id @default(uuid()) @db.Uuid
-  user_id String @db.Uuid
+model Vendor {
+  vendor_id     String   @id @default(uuid()) @db.Uuid
+  user_id       String   @db.Uuid
   business_name String
-  address String
+  address       String
   contact_email String
   contact_phone String
-  approved Boolean @default(false)
-  created_at DateTime @default(now())
+  approved      Boolean  @default(false)
+  created_at    DateTime @default(now())
 
-  user User @relation(fields: [user_id],references: [user_id])
-   properties     Property[]
-
+  user       User       @relation(fields: [user_id], references: [user_id])
+  properties Property[]
 }
 
-
-model Property{
-  property_id String @id @default(uuid()) @db.Uuid
-  vendor_id String @db.Uuid
+model Property {
+  property_id   String   @id @default(uuid()) @db.Uuid
+  vendor_id     String   @db.Uuid
   property_name String
-  property_desc String 
-  location String
-  address String
-  amenities String[]
-  images String[]
-  created_at DateTime @default(now())
+  property_desc String
+  location      String
+  address       String
+  amenities     String[]
+  images        Image[]
+  created_at    DateTime @default(now())
 
-  vendor Vendor @relation(fields: [vendor_id],references: [vendor_id])
+  vendor Vendor @relation(fields: [vendor_id], references: [vendor_id])
+  rooms  Room[]
 }
 
+model Room {
+  room_id         String  @id @default(uuid()) @db.Uuid
+  property_id     String  @db.Uuid
+  room_name       String
+  room_desc       String
+  capacity        Int
+  price_per_night Int
+  images          Image[]
 
+  property Property @relation(fields: [property_id], references: [property_id])
+}
+
+model Image {
+  id          String    @id @default(uuid())
+  url         String
+  publicId    String
+  property_id String?   @db.Uuid
+  room_id     String?   @db.Uuid
+  property    Property? @relation(fields: [property_id], references: [property_id])
+  room        Room?     @relation(fields: [room_id], references: [room_id])
+}
 
 // npx prisma migrate dev --name init
-
