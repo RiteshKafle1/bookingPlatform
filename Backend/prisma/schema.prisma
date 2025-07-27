@@ -19,7 +19,7 @@ enum UserRole{
   admin
 }
 model User{
-  user_id String @id @default(uuid())
+  user_id String @id @default(uuid()) @db.Uuid
   userName String 
   userEmail String @unique
   password String?
@@ -28,8 +28,41 @@ model User{
   verification_token String?
   verification_token_expires_at DateTime?
   created_at DateTime @default(now())
+  vendors    Vendor[]
 
 }
+
+model Vendor{
+  vendor_id String @id @default(uuid()) @db.Uuid
+  user_id String @db.Uuid
+  business_name String
+  address String
+  contact_email String
+  contact_phone String
+  approved Boolean @default(false)
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id],references: [user_id])
+   properties     Property[]
+
+}
+
+
+model Property{
+  property_id String @id @default(uuid()) @db.Uuid
+  vendor_id String @db.Uuid
+  property_name String
+  property_desc String 
+  location String
+  address String
+  amenities String[]
+  images String[]
+  created_at DateTime @default(now())
+
+  vendor Vendor @relation(fields: [vendor_id],references: [vendor_id])
+}
+
+
 
 // npx prisma migrate dev --name init
 
